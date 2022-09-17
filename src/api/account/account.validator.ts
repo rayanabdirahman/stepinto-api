@@ -1,6 +1,6 @@
 import Joi from "joi";
 import { AccountRolesEnum } from "../../domain/enums/account";
-import { ISignUpModel } from "../../domain/interfaces/account";
+import { ISignInModel, ISignUpModel } from "../../domain/interfaces/account";
 
 export default class AccountValidator {
   static signUpSchema: Joi.ObjectSchema = Joi.object({
@@ -14,5 +14,14 @@ export default class AccountValidator {
 
   static signUp(model: ISignUpModel): Joi.ValidationResult {
     return this.signUpSchema.validate(model);
+  }
+
+  static signInSchema: Joi.ObjectSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).max(15).required(),
+  });
+
+  static signIn(model: ISignInModel): Joi.ValidationResult {
+    return this.signInSchema.validate(model);
   }
 }

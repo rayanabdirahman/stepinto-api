@@ -1,12 +1,14 @@
 import { injectable, inject } from "inversify";
 import { IUserDocument } from "../database/models/user.model";
 import { IUserRepository } from "../database/repositories/user.repository";
-import { ISignUpModel } from "../domain/interfaces/account";
+import { ISignInModel, ISignUpModel } from "../domain/interfaces/account";
 import TYPES from "../types";
+import BycryptHelper from "../utilities/bcryptHelper";
 import logger from "../utilities/logger";
 
 export interface IAccountService {
   signUp(model: ISignUpModel): Promise<any>;
+  signIn(model: ISignInModel): Promise<IUserDocument>;
 }
 
 @injectable()
@@ -48,6 +50,35 @@ export class AccountServiceImpl implements IAccountService {
       logger.error(
         `[AccountService: signUp]: Unabled to create a new user: ${error}`
       );
+      throw error;
+    }
+  }
+
+  async signIn(model: ISignInModel): Promise<IUserDocument> {
+    try {
+      // find user by email address
+      const dbUser = await this.userRepository.findOneBy(
+        { email: model.email },
+        false
+      );
+      if (!dbUser) {
+        throw new Error("Invalid credentials");
+      }
+
+      const { password: hashedPassword, ...user } = dbUser.toObject();
+
+      // check if passwords match
+      const doPasswordsMatch = await BycryptHelper.comparePassword(
+        model.password,
+        hashedPassword
+      );
+      if (!doPasswordsMatch) {
+        throw new Error("Invalid credentials");
+      }
+
+      return user as IUserDocument;
+    } catch (error: any) {
+      logger.error(`[AccountService: signIn]: Unabled to find user: ${error}`);
       throw error;
     }
   }

@@ -9,6 +9,11 @@ export interface ISignUpModel {
   role: AccountRolesEnum;
 }
 
+export interface ISignInModel {
+  email: string;
+  password: string;
+}
+
 export interface IGoogleSignUpModel {
   googleId: string;
   name: string;

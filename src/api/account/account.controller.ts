@@ -1,7 +1,7 @@
 import { Application, Request, Response } from "express";
 import { inject, injectable } from "inversify";
 import config from "../../config";
-import { ISignUpModel } from "../../domain/interfaces/account";
+import { ISignInModel, ISignUpModel } from "../../domain/interfaces/account";
 import { IAccountService } from "../../services/account.service";
 import TYPES from "../../types";
 import ApiResponse from "../../utilities/apiResponse";
@@ -20,6 +20,7 @@ export default class AccountController implements RegistrableController {
 
   registerRoutes(app: Application): void {
     app.post(`/${config.API_URL}/accounts/auth/signup`, this.signUp);
+    app.post(`/${config.API_URL}/accounts/auth/signin`, this.signIn);
   }
 
   signUp = async (req: Request, res: Response): Promise<Response> => {
@@ -48,6 +49,30 @@ export default class AccountController implements RegistrableController {
     } catch (error: any) {
       logger.error(
         `[AccountController: signup] - Unable to sign up user: ${error?.message}`
+      );
+      return ApiResponse.error(res, error?.message);
+    }
+  };
+
+  signIn = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const model: ISignInModel = {
+        ...req.body,
+      };
+
+      // validate request body
+      const validity = AccountValidator.signIn(model);
+      if (validity.error) {
+        const { message } = validity.error;
+        return ApiResponse.error(res, message);
+      }
+
+      const user = await this.accountService.signIn(model);
+
+      return ApiResponse.success(res, { user });
+    } catch (error: any) {
+      logger.error(
+        `[AccountController: signIn] - Unable to sign in user: ${error?.message}`
       );
       return ApiResponse.error(res, error?.message);
     }
