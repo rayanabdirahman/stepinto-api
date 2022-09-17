@@ -18,9 +18,9 @@ export default (): Promise<express.Application> =>
       app.use(morgan("dev"));
 
       // register api routes
-      // const controllers: RegistrableController[] =
-      //   container.getAll<RegistrableController>(TYPES.Controller);
-      // controllers.forEach((controller) => controller.registerRoutes(app));
+      const controllers: RegistrableController[] =
+        container.getAll<RegistrableController>(TYPES.Controller);
+      controllers.forEach((controller) => controller.registerRoutes(app));
 
       // test api route
       app.get(
