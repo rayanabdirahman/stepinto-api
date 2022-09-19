@@ -5,6 +5,7 @@ import { ISignInModel, ISignUpModel } from "../../domain/interfaces/account";
 import { IAccountService } from "../../services/account.service";
 import TYPES from "../../types";
 import ApiResponse from "../../utilities/apiResponse";
+import CookiesHelper from "../../utilities/cookiesHelper";
 import getAvatar from "../../utilities/getAvatar";
 import logger from "../../utilities/logger";
 import { RegistrableController } from "../registrable.controller";
@@ -67,9 +68,13 @@ export default class AccountController implements RegistrableController {
         return ApiResponse.error(res, message);
       }
 
-      const user = await this.accountService.signIn(model);
+      const { accessToken, refreshToken } = await this.accountService.signIn(
+        model
+      );
 
-      return ApiResponse.success(res, { user });
+      CookiesHelper.setTokens(res, accessToken, refreshToken);
+
+      return ApiResponse.success(res, { message: "SIGNED_IN" });
     } catch (error: any) {
       logger.error(
         `[AccountController: signIn] - Unable to sign in user: ${error?.message}`

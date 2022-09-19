@@ -12,7 +12,12 @@ export default (): Promise<express.Application> =>
       const app = express();
 
       // set middlewares
-      app.use(cors());
+      app.use(
+        cors({
+          origin: ["http://localhost:3000"],
+          credentials: true,
+        })
+      );
       app.use(express.urlencoded({ extended: true }));
       app.use(express.json());
       app.use(morgan("dev"));

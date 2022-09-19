@@ -4,11 +4,14 @@ import { IUserRepository } from "../database/repositories/user.repository";
 import { ISignInModel, ISignUpModel } from "../domain/interfaces/account";
 import TYPES from "../types";
 import BycryptHelper from "../utilities/bcryptHelper";
+import JwtHelper from "../utilities/jwtHelper";
 import logger from "../utilities/logger";
 
 export interface IAccountService {
   signUp(model: ISignUpModel): Promise<any>;
-  signIn(model: ISignInModel): Promise<IUserDocument>;
+  signIn(
+    model: ISignInModel
+  ): Promise<{ accessToken: string; refreshToken: string }>;
 }
 
 @injectable()
@@ -54,7 +57,9 @@ export class AccountServiceImpl implements IAccountService {
     }
   }
 
-  async signIn(model: ISignInModel): Promise<IUserDocument> {
+  async signIn(
+    model: ISignInModel
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       // find user by email address
       const dbUser = await this.userRepository.findOneBy(
@@ -76,7 +81,11 @@ export class AccountServiceImpl implements IAccountService {
         throw new Error("Invalid credentials");
       }
 
-      return user as IUserDocument;
+      const accessToken = await JwtHelper.signAccessToken(user._id as string);
+
+      const refreshToken = await JwtHelper.signRefreshToken(user._id as string);
+
+      return { accessToken, refreshToken };
     } catch (error: any) {
       logger.error(`[AccountService: signIn]: Unabled to find user: ${error}`);
       throw error;
