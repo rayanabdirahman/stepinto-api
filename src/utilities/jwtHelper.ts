@@ -7,8 +7,8 @@ interface IJWTPayload {
 }
 
 interface IJwtHelper {
-  signAccessToken(userId: string): Promise<string>;
-  signRefreshToken(userId: string): Promise<string>;
+  signAccessToken(userId: unknown): Promise<string>;
+  signRefreshToken(userId: unknown): Promise<string>;
   decodeAccessToken(token: string): Promise<IJWTPayload>;
   decodeRefreshToken(token: string): Promise<IJWTPayload>;
 }
@@ -22,15 +22,15 @@ const _setPayload = (userId: string): { user: { _id: string } } => {
 };
 
 const JwtHelper: IJwtHelper = {
-  async signAccessToken(userId: string): Promise<string> {
-    const payload = _setPayload(userId);
+  async signAccessToken(userId: unknown): Promise<string> {
+    const payload = _setPayload(userId as string);
 
     return jwt.sign(payload, `${config.JWT_ACCESS_TOKEN_SECRET}`, {
       expiresIn: JWTTokenExpiration.ACCESS,
     });
   },
-  async signRefreshToken(userId: string): Promise<string> {
-    const payload = _setPayload(userId);
+  async signRefreshToken(userId: unknown): Promise<string> {
+    const payload = _setPayload(userId as string);
 
     return jwt.sign(payload, `${config.JWT_REFRESH_TOKEN_SECRET}`, {
       expiresIn: JWTTokenExpiration.REFRESH,

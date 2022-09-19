@@ -8,7 +8,9 @@ import JwtHelper from "../utilities/jwtHelper";
 import logger from "../utilities/logger";
 
 export interface IAccountService {
-  signUp(model: ISignUpModel): Promise<any>;
+  signUp(
+    model: ISignUpModel
+  ): Promise<{ accessToken: string; refreshToken: string }>;
   signIn(
     model: ISignInModel
   ): Promise<{ accessToken: string; refreshToken: string }>;
@@ -38,15 +40,20 @@ export class AccountServiceImpl implements IAccountService {
     return username;
   }
 
-  async signUp(model: ISignUpModel): Promise<IUserDocument> {
+  async signUp(
+    model: ISignUpModel
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       // check for a valid default username
       const username = await this.validateUsername(model.username);
 
-      // create new user
       const user = await this.userRepository.createOne({ ...model, username });
 
-      return user;
+      const accessToken = await JwtHelper.signAccessToken(user._id);
+
+      const refreshToken = await JwtHelper.signRefreshToken(user._id);
+
+      return { accessToken, refreshToken };
     } catch (error: any) {
       if (error?.code === 11000) {
         error.message = `A user with the given credentials exists`;

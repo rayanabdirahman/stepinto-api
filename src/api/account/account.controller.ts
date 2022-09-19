@@ -49,9 +49,13 @@ export default class AccountController implements RegistrableController {
         return ApiResponse.error(res, message);
       }
 
-      const user = await this.accountService.signUp(model);
+      const { accessToken, refreshToken } = await this.accountService.signUp(
+        model
+      );
 
-      return ApiResponse.success(res, { user });
+      CookiesHelper.setTokens(res, accessToken, refreshToken);
+
+      return ApiResponse.success(res, { message: "SIGNED_UP" });
     } catch (error: any) {
       logger.error(
         `[AccountController: signup] - Unable to sign up user: ${error?.message}`
@@ -127,6 +131,8 @@ export default class AccountController implements RegistrableController {
   refreshToken = async (req: Request, res: Response): Promise<Response> => {
     try {
       const refreshTokenCookie = req.cookies[Cookies.REFRESH_TOKEN];
+
+      console.log("COOKIES: ", refreshTokenCookie);
 
       const jwtPayload = await JwtHelper.decodeRefreshToken(refreshTokenCookie);
 
