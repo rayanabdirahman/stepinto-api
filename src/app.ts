@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 import logger from "./utilities/logger";
 import container from "./inversify.config";
 import { RegistrableController } from "./api/registrable.controller";
@@ -12,14 +13,15 @@ export default (): Promise<express.Application> =>
       const app = express();
 
       // set middlewares
+      app.use(express.urlencoded({ extended: true }));
+      app.use(express.json());
+      app.use(cookieParser());
       app.use(
         cors({
           origin: ["http://localhost:3000"],
           credentials: true,
         })
       );
-      app.use(express.urlencoded({ extended: true }));
-      app.use(express.json());
       app.use(morgan("dev"));
 
       // register api routes

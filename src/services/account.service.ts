@@ -12,6 +12,7 @@ export interface IAccountService {
   signIn(
     model: ISignInModel
   ): Promise<{ accessToken: string; refreshToken: string }>;
+  getUserById(_id: string): Promise<IUserDocument | null>;
 }
 
 @injectable()
@@ -88,6 +89,20 @@ export class AccountServiceImpl implements IAccountService {
       return { accessToken, refreshToken };
     } catch (error: any) {
       logger.error(`[AccountService: signIn]: Unabled to find user: ${error}`);
+      throw error;
+    }
+  }
+
+  async getUserById(_id: string): Promise<IUserDocument | null> {
+    try {
+      // find user by id
+      const user = await this.userRepository.findOneBy({ _id });
+
+      return user;
+    } catch (error: any) {
+      logger.error(
+        `[AccountService: getUserById]: Unabled to find user: ${error}`
+      );
       throw error;
     }
   }

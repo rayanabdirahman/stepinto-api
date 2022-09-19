@@ -4,6 +4,6 @@ export enum JWTTokenExpiration {
 }
 
 export enum Cookies {
-  ACCESS_TOKEN_NAME = "JWTAccessToken",
-  REFRESH_TOKEN_NAME = "JWTRefreshToken",
+  ACCESS_TOKEN = "JWTAccessToken",
+  REFRESH_TOKEN = "JWTRefreshToken",
 }
