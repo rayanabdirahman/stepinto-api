@@ -132,8 +132,6 @@ export default class AccountController implements RegistrableController {
     try {
       const refreshTokenCookie = req.cookies[Cookies.REFRESH_TOKEN];
 
-      console.log("COOKIES: ", refreshTokenCookie);
-
       const jwtPayload = await JwtHelper.decodeRefreshToken(refreshTokenCookie);
 
       const newAccessToken = await JwtHelper.signAccessToken(
